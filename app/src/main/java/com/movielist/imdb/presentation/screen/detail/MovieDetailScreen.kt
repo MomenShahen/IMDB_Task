@@ -96,12 +96,12 @@ fun MovieDetail(
                         modifier = Modifier.padding(start = 12.dp)
                     ) {
                         // Rating
-                        MovieMeta(key = "Rating", value = movie.voteCount.toString())
+                        MovieMeta(key = "Rating", value = movie.vote_average.toString())
 
                         // Director
                         MovieMeta(
-                            key = "Director",
-                            value = movie.releaseDate.toString()
+                            key = "Release Date",
+                            value = movie.release_date.toString()
                         )
                     }
                 }

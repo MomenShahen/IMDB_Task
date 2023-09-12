@@ -1,5 +1,7 @@
 package com.movielist.imdb.utils
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import com.movielist.imdb.domain.data.Movie
 import com.movielist.imdb.domain.data.ScreenState
 
@@ -20,3 +22,6 @@ fun isLoadingMoreState(screenState: ScreenState<Movie>) =
 
 fun isSuccessDataState(screenState: ScreenState<Movie>) =
     !screenState.isLoading && screenState.items.isNotEmpty()
+
+@OptIn(ExperimentalFoundationApi::class)
+fun LazyStaggeredGridState.isScrolledToEnd() = layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1

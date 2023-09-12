@@ -5,7 +5,7 @@ data class MoviesResponse(
 
     var page: Int = 1,
     var results: List<Movie>? = null,
-    var totalPages: Int = 1,
-    var totalResults: Int = results?.size ?: 0
+    var total_pages: Int = 1,
+    var total_results: Int = results?.size ?: 0
 
 )

@@ -35,7 +35,7 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     fun onOpenImdbClicked(movie: Movie) {
-        _openImdbUrl.tryEmit("${POSTER_BASE_URL}${movie.posterPath}")
+        _openImdbUrl.tryEmit("${POSTER_BASE_URL}${movie.poster_path}")
     }
 
     fun onBackPressed() {

@@ -5,20 +5,20 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.io.Serializable
 
-//@Keep
-//@Entity(
-//    tableName = "movie"
-//)
+@Keep
+@Entity(
+    tableName = "movie"
+)
 data class Movie(
-    var originalTitle: String? = null,
+    var original_title: String? = null,
     var overview: String? = null,
     var popularity: Double? = null,
-    var posterPath: String? = null,
-    var releaseDate: String? = null,
+    var poster_path: String? = null,
+    var release_date: String? = null,
     var title: String? = null,
-    var voteAverage: Double? = null,
-    var voteCount: Int? = null
+    var vote_average: Double? = null,
+    var vote_count: Int? = null
 ) : Serializable {
-//    @PrimaryKey
+    @PrimaryKey
     var id: Int = 0
 }

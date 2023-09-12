@@ -10,6 +10,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Scale
 import com.movielist.imdb.domain.data.Movie
+import com.movielist.imdb.utils.Constants
 
 @Composable
 fun Poster(
@@ -22,7 +23,7 @@ fun Poster(
     ) {
         Image(
             painter = rememberAsyncImagePainter(
-                ImageRequest.Builder(LocalContext.current).data(data = movie.posterPath)
+                ImageRequest.Builder(LocalContext.current).data(data = "${Constants.POSTER_BASE_URL}${movie.poster_path}")
                     .apply(block = fun ImageRequest.Builder.() {
                         crossfade(true)
                         scale(Scale.FILL)

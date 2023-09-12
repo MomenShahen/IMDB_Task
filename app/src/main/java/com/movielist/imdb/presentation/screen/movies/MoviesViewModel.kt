@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
 import com.movielist.imdb.domain.data.Movie
 import com.movielist.imdb.domain.data.ScreenState
 import com.movielist.imdb.domain.usecase.GetMoviesUseCase
@@ -40,9 +39,10 @@ class MoviesViewModel @Inject constructor(
                 val response = useCase(nextPage)
 
                 if (response is Resource.Success) {
+                    totalPage = response.data.total_pages
                     return@DefaultPaginator response.data.results ?: emptyList()
                 } else {
-                    emptyList()
+                    return@DefaultPaginator emptyList()
                 }
 
             } else {
@@ -53,6 +53,7 @@ class MoviesViewModel @Inject constructor(
             moviesState.page + 1
         }
     ) { items, newPage ->
+        moviesState.items.addAll(items)
         moviesState = moviesState.copy(
             page = newPage,
             endReached = items.isEmpty()
@@ -96,10 +97,9 @@ class MoviesViewModel @Inject constructor(
         _toggleDarkMode.tryEmit(isDarkMode.not())
     }
 
-    fun onRetryClicked() {
+    fun onLoadMoreClicked() {
         viewModelScope.launchCatching(
             block = {
-                Log.e("LOG", "page = ${moviesState.page}")
                 paginator.loadNextItems()
             },
             onError = {

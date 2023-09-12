@@ -2,11 +2,15 @@ package com.movielist.imdb.presentation.screen.movies
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,6 +29,7 @@ import com.movielist.imdb.presentation.common.Poster
 import com.movielist.imdb.presentation.common.RetryMessage
 import com.movielist.imdb.presentation.theme.TopCornTheme
 import com.movielist.imdb.utils.isFailureState
+import com.movielist.imdb.utils.isScrolledToEnd
 import com.movielist.imdb.utils.loadingState
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -65,10 +70,10 @@ fun MoviesScreen(
                 screenState = screenState,
                 onMovieClicked = {
                     moviesViewModel.onMovieClicked(it)
-                }
-            ) {
-                moviesViewModel.onRetryClicked()
-            }
+                },
+                onLoadMoreScrolled = { moviesViewModel.onLoadMoreClicked()},
+                onRetryClicked = moviesViewModel::onLoadMoreClicked
+            )
         }
     }
 }
@@ -90,12 +95,16 @@ fun AppBarMenu(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BodyContent(
     screenState: ScreenState<Movie>,
     onMovieClicked: (Movie) -> Unit,
-    onRetryClicked: () -> Unit
+    onRetryClicked: () -> Unit,
+    onLoadMoreScrolled: () -> Unit,
 ) {
+    val cardWidth = (LocalConfiguration.current.screenWidthDp / 3).dp
+    val lazyStaggeredGridState = rememberLazyStaggeredGridState()
 
     when {
         loadingState(screenState) -> {
@@ -116,19 +125,27 @@ fun BodyContent(
         }
 
         else -> {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Fixed(3),
+                state = lazyStaggeredGridState
             ) {
                 itemsIndexed(screenState.items) { _, movie ->
-                    MovieItem(movie = movie, onMovieClicked = onMovieClicked)
+                    // calling api to load more items
+                    if (lazyStaggeredGridState.isScrolledToEnd() && !lazyStaggeredGridState.canScrollForward && !screenState.endReached && !screenState.isLoading) {
+                        LaunchedEffect(lazyStaggeredGridState.isScrolledToEnd()) {
+                            onLoadMoreScrolled()
+                        }
+                    }
+                    MovieItem(
+                        movie = movie,
+                        onMovieClicked = onMovieClicked,
+                        Modifier.requiredWidth(cardWidth)
+                    )
                 }
             }
         }
     }
 }
-
-
-private val cardWidth = 150.dp
 
 @Composable
 fun MovieItem(
@@ -138,14 +155,12 @@ fun MovieItem(
 ) {
     Column(
         modifier = modifier
-            .requiredWidth(cardWidth)
             .padding(10.dp)
     ) {
 
         // Poster
         Poster(
-            modifier = Modifier
-                .requiredWidth(cardWidth)
+            modifier = modifier
                 .requiredHeight(200.dp),
             movie = movie,
             onMovieClicked = onMovieClicked
@@ -171,14 +186,14 @@ fun MovieItem(
                 modifier = Modifier
                     .padding(end = 4.dp)
                     .requiredSize(12.dp),
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_rating),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendar),
                 tint = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
                 contentDescription = null
             )
 
             // Rating
             Text(
-                text = movie.voteAverage.toString(),
+                text = movie.release_date.toString(),
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
                 style = MaterialTheme.typography.overline,
                 modifier = Modifier.padding(top = 2.dp)

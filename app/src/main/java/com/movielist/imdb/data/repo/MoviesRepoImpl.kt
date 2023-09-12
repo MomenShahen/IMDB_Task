@@ -1,20 +1,19 @@
 package com.movielist.imdb.data.repo
 
-import android.util.Log
-import com.google.gson.Gson
-//import com.movielist.imdb.data.local.daos.MoviesDao
+import com.movielist.imdb.data.local.daos.MoviesDao
 import com.movielist.imdb.data.remote.ApiInterface
 import com.movielist.imdb.domain.data.Movie
 import com.movielist.imdb.domain.data.MoviesResponse
 import com.movielist.imdb.domain.repository.MoviesRepo
 import com.movielist.imdb.utils.Resource
-import kotlinx.coroutines.flow.first
-import java.io.IOException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MoviesRepoImpl @Inject constructor(
     private val apiInterface: ApiInterface,
-//    private val moviesDao: MoviesDao
+    private val moviesDao: MoviesDao
 ) : MoviesRepo {
     private var shouldLoadRemoteData = false
 
@@ -30,18 +29,20 @@ class MoviesRepoImpl @Inject constructor(
 //            shouldLoadRemoteData = true
 //            getLocalMovies()
 //        } else {
-            val response = apiInterface.getMovies(pageNumber)
-            if (response is Resource.Success) {
-//                response.data.results?.let { moviesDao.nukeTableAndAdd(it) }
-            } else if (response is Resource.Error) {
-                throw IOException(response.errorData)
+        val response = apiInterface.getMovies(pageNumber)
+//        Log.e("Result",Gson().toJson(response))
+        return if (response.isSuccessful) {
+            CoroutineScope(Dispatchers.IO).launch {
+                response.body()?.results?.let { moviesDao.nukeTableAndAdd(it) }
             }
-        Log.e("Result",Gson().toJson(response))
-
-            return response
+            Resource.Success(data = response.body() as MoviesResponse, message = "")
+        } else {
+            //                throw IOException(response.errorBody().toString())
+            Resource.Error(errorData = response.errorBody().toString())
+        }
 //        }
     }
 
-    override suspend fun getMovie(movieId: Int) = Movie()
+    override suspend fun getMovie(movieId: Int) = moviesDao.getMovie(movieId)
 
 }

@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import com.movielist.imdb.domain.data.Movie
 import com.movielist.imdb.domain.data.ScreenState
 import com.movielist.imdb.domain.usecase.GetMoviesUseCase
@@ -66,13 +67,13 @@ class MoviesViewModel @Inject constructor(
                 Log.e("LOG", "Start VM")
                 //first time load from DB if exist
                 Log.e("LOG", "page = 1")
-//                (useCase(1) as Resource.Success).data.results?.toMutableList()?.let {
-//                    Log.e("LOG", "response page 1 ${Gson().toJson(it)}")
-//                    moviesState = moviesState.copy(
-//                        items = it,
-//                        isLoading = it.isEmpty()
-//                    )
-//                }
+                (useCase(1) as Resource.Success).data.results?.toMutableList()?.let {
+                    Log.e("LOG", "response page 1 ${Gson().toJson(it)}")
+                    moviesState = moviesState.copy(
+                        items = it,
+                        isLoading = it.isEmpty()
+                    )
+                }
                 paginator.loadNextItems()
 
             },

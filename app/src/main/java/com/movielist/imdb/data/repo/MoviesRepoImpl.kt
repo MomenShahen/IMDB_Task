@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import javax.inject.Inject
 
 class MoviesRepoImpl @Inject constructor(
@@ -31,13 +32,17 @@ class MoviesRepoImpl @Inject constructor(
         } else {
             val response = apiInterface.getMovies(pageNumber)
             if (response.isSuccessful) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    response.body()?.results?.let { moviesDao.nukeTableAndAdd(it) }
-                }
+                saveMovies(response)
                 Resource.Success(data = response.body() as MoviesResponse, message = "")
             } else {
                 Resource.Error(errorData = response.errorBody().toString())
             }
+        }
+    }
+
+    private fun saveMovies(response: Response<MoviesResponse>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            response.body()?.results?.let { moviesDao.nukeTableAndAdd(it) }
         }
     }
 
